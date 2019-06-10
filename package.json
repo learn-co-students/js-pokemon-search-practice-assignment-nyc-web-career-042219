@@ -1,0 +1,24 @@
+{
+  "name": "js-pokemon-search-practice-assignment-nyc-web-career-042219",
+  "version": "1.0.0",
+  "description": "![pikachu](https://media.giphy.com/media/uLnPIWsqIz2aA/giphy.gif)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JsnGmz/js-pokemon-search-practice-assignment-nyc-web-career-042219.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JsnGmz/js-pokemon-search-practice-assignment-nyc-web-career-042219/issues"
+  },
+  "homepage": "https://github.com/JsnGmz/js-pokemon-search-practice-assignment-nyc-web-career-042219#readme",
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.17.3"
+  }
+}
