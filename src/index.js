@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const pokemonContainer = document.getElementById('pokemon-container')
   const pokemonSearch = document.getElementById('pokemon-search-form')
   const submitForm = document.querySelector('#new-pokemon-form')
-  const editForm = document.querySelector('#edit-pokemon-form')
   let pokemons = []
   
 
