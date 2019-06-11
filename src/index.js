@@ -124,6 +124,16 @@ function makeDatPoke(poke){
           <img data-id="${poke.id}" data-action="flip" id="pic" class="toggle-sprite" src=${poke.sprites.front}>
           <button id="edit" >edit</button>   <button id="del" >delete</button>
         </div>
+        <form data-id="${poke.id}" class="edit-pokemon-form" style="display:none">
+         <h3>Edit this Pokemon!</h3>
+         <input type="text" id ="name" value="" placeholder="Enter new Pokemon's name..." class="input-text">
+         <br>
+         <input type="text" id="frontImage" value="" placeholder="Enter new Pokemon's front URL..." class="input-text">
+         <br>
+         <input type="text" id="backImage" value="" placeholder="Enter new Pokemon's back URL..." class="input-text">
+         <br>
+         <input type="submit" id="edit-submit" name="submit" value="Edit This Pokemon">
+       </form>
       </div>
     </div>
   `
@@ -147,12 +157,10 @@ document.querySelector("body").addEventListener("click", e=> {
     case "del":
     delPokemon(e)
     break
-    case
-    "pic":
+    case "pic":
     flip(e)
     break
   }
-
 })
 
 function renderCreateform(e){
@@ -160,11 +168,11 @@ function renderCreateform(e){
     <center>
       <form class="edit-pokemon-form" style="">
      <h3>Add A Pokemon!</h3>
-     <input type="text" name="name" value="" placeholder="Enter Pokemon's name..." class="input-text">
+     <input type="text" id ="name" placeholder="Enter Pokemon's name..." class="input-text">
      <br>
-     <input type="text" name="image" value="" placeholder="Enter Pokemon's front URL..." class="input-text">
+     <input type="text" id="frontImage"  placeholder="Enter Pokemon's front URL..." class="input-text">
      <br>
-     <input type="text" name="image" value="" placeholder="Enter Pokemon's back URL..." class="input-text">
+     <input type="text" id="backImage" value="" placeholder="Enter Pokemon's back URL..." class="input-text">
      <br>
      <input type="submit" id="create-submit" name="submit" value="Create a Pokemon">
    </form>
@@ -173,11 +181,9 @@ function renderCreateform(e){
 }
 
 function addPoke(e){
-
-  let name = e.target.parentElement.children[1].value
-  let front = e.target.parentElement.children[3].value
-  let back = e.target.parentElement.children[5].value
-
+  name = e.target.parentElement.querySelector("#name").value
+  front = e.target.parentElement.querySelector("#frontImage").value
+  back = e.target.parentElement.querySelector("#backImage").value
   if (name === "" || front === "" || back === "") {
   alert("You can't leave Dat Pokemon Info blank")
   }
@@ -198,43 +204,37 @@ function addPoke(e){
       })
       .then(r=>r.json())
       .then(newPoke=>{
-      pokeCon.innerHTML += (makeDatPoke(newPoke))
+      pokeArr.push(newPoke)
+      renderAllpokemon(pokeArr)
+      pokeCount(pokeArr)
       addPokeButton()
       })
     }
 }
 
 function renderEditform(e){
-  if (e.target.innerHTML.length <= 4){
-    e.target.innerHTML += `
-      <form class="edit-pokemon-form" style="">
-       <h3>Edit this Pokemon!</h3>
-
-       <input type="text" name="name" value="" placeholder="Enter new Pokemon's name..." class="input-text">
-       <br>
-       <input type="text" name="image" value="" placeholder="Enter new Pokemon's front URL..." class="input-text">
-       <br>
-       <input type="text" name="image" value="" placeholder="Enter new Pokemon's back URL..." class="input-text">
-       <br>
-       <input type="submit" id="edit-submit" name="submit" value="Edit This Pokemon">
-     </form>
-    `
-  }
-
+editStatus = e.target.parentNode.parentNode.querySelector("form")
+  if (editStatus.style.display === "block" ){
+      editStatus.style.display = "none"
+    }
+    else {
+      editStatus.style.display = "block"
+    }
 }
 
 function editPokemon(e){
-  let pokeId = parseInt(e.target.parentElement.parentElement.parentElement.firstElementChild.dataset.id)
+  let pokeId = parseInt(e.target.parentElement.dataset.id)
 
-  name = e.target.parentElement.children[1].value
-  front = e.target.parentElement.children[3].value
-  back = e.target.parentElement.children[5].value
+  name = e.target.parentElement.querySelector("#name").value
+  front = e.target.parentElement.querySelector("#frontImage").value
+  back = e.target.parentElement.querySelector("#backImage").value
 
   if (name === "" || front === "" || back === "") {
   alert("You can't leave Dat Pokemon Info blank")
  }
-  else{
 
+
+  else{
   fetch(`http://localhost:3000/pokemon/${pokeId}`,{
       method: "PATCH",
       headers: {
@@ -250,18 +250,16 @@ function editPokemon(e){
       })
     }).then(r=>r.json())
       .then(editedPoke=>{
-        let foundPoke = pokeArr.find(poke=>{
+        let oldPoke = pokeArr.find(poke=>{
         return poke.id === editedPoke.id})
-        pokeArr[pokeArr.indexOf(foundPoke)] = editedPoke
+        pokeArr[pokeArr.indexOf(oldPoke)] = editedPoke
         renderAllpokemon(pokeArr)
       })
     }
   }
 
 function delPokemon(e){
-
   let pokeId = parseInt(e.target.parentElement.parentElement.children[1].children[0].dataset.id)
-
 
   fetch(`http://localhost:3000/pokemon/${pokeId}`,{
     method: "DELETE"
