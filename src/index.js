@@ -93,8 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
   getPoke()
   addPokeButton()
 
-
-
   function addPokeButton(){
     topPage.children[3].innerHTML =`
       <center><button  id="add"  >Add a Pokemon</button></center>
@@ -117,7 +115,6 @@ fetch(POKEURL)
     })
   }
 
-
 function makeDatPoke(poke){
   return  `
   <div class="pokemon-card">
@@ -131,7 +128,6 @@ function makeDatPoke(poke){
     </div>
   `
 }
-
 
 document.querySelector("body").addEventListener("click", e=> {
   e.preventDefault()
@@ -176,7 +172,6 @@ function renderCreateform(e){
   `
 }
 
-
 function addPoke(e){
 
   let name = e.target.parentElement.children[1].value
@@ -199,7 +194,6 @@ function addPoke(e){
                       front,
                       back
                     }
-
         })
       })
       .then(r=>r.json())
@@ -209,7 +203,6 @@ function addPoke(e){
       })
     }
 }
-
 
 function renderEditform(e){
   if (e.target.innerHTML.length <= 4){
@@ -230,7 +223,6 @@ function renderEditform(e){
 
 }
 
-//
 function editPokemon(e){
   let pokeId = parseInt(e.target.parentElement.parentElement.parentElement.firstElementChild.dataset.id)
 
@@ -266,17 +258,6 @@ function editPokemon(e){
     }
   }
 
-     // ****this is that basic way////
-                  // foundPoke.name = name
-                  // foundPoke.sprites.front = front
-                  // foundPoke.sprites.back = back
-                  // e.target.parentElement.parentElement.parentElement.parentElement.children[0].innerText = name
-                  // e.target.parentElement.parentElement.parentElement.children[0].src = front
-                  //
-
-
-
-
 function delPokemon(e){
 
   let pokeId = parseInt(e.target.parentElement.parentElement.children[1].children[0].dataset.id)
@@ -293,8 +274,6 @@ function delPokemon(e){
   }).join("")
   }
 
-
-
   document.querySelector("body").addEventListener("input", e=>{
       if (e.target.id === "pokemon-search-input"){
           let input = e.target.value
@@ -308,8 +287,6 @@ function delPokemon(e){
       }
       pokeCount()
   })
-
-
 
   function flip(e){
     if (!!event.target.dataset.id) {
@@ -328,8 +305,5 @@ function delPokemon(e){
     if (filterPokes)
     topPage.querySelector('center').innerHTML =  `There are ${filterPokes.length} Pokemon  here`
   }
-
-
-
 
 })
