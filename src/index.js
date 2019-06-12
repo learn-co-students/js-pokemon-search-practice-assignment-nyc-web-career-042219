@@ -2,60 +2,16 @@ const POKE_URL = 'http://localhost:3000/pokemon';
 const POKE_ARRAY = [];
 
 document.addEventListener('DOMContentLoaded', () => {
-  const pokeContainer = document.querySelector('#pokemon-container')
-  document.querySelector('center').remove();
-  pokeContainer.prepend(createForm());
-
+  const pokeContainer = document.querySelector('#pokemon-container');
+  const searchForm = document.querySelector('#pokemon-search-input');
   fetchPokemon(pokeContainer);
+  pokeContainer.prepend(createForm());
 
   let flip = false;
 
-  pokeContainer.addEventListener('click', function(e) {
-    if (e.target.dataset.action === 'flip') {
-      let pokemon = findPokemon(e.target.dataset.id);
+  ['click', 'submit', 'mouseover', 'mouseout'].forEach(event => pokeContainer.addEventListener(event, eventHandler, false));
 
-      e.target.src = (!flip) ? pokemon.sprites.back : pokemon.sprites.front;
-      flip = !flip;
-    } else if (e.target.name === 'del-pokemon') {
-      deletePokemon(e);
-    } else if (e.target.name === 'edit-pokemon') {
-      editPokemon(e);
-    }
-  })
-
-  pokeContainer.addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    if (e.target.id === 'new-pokemon-form')
-      createNewPokemon(e, pokeContainer);
-  })
-
-  //hover over and show cool stuff
-  pokeContainer.addEventListener('mouseover', function(e) {
-    if (e.target.className === 'pokemon-frame') {
-      let hoverText = document.createElement('div');
-      let imageDiv = e.target.children[1];
-
-      hoverText.innerHTML = showStats(findPokemon(imageDiv.firstElementChild.dataset.id));
-      imageDiv.firstElementChild.style.opacity = 0;
-      imageDiv.prepend(hoverText);
-    }
-  })
-
-  pokeContainer.addEventListener('mouseout', function(e) {
-    if (e.target.className === 'pokemon-frame') {
-      let pokemonImage = e.target.children[1];
-      pokemonImage.insertBefore(pokemonImage.children[1], pokemonImage.children[0])
-      pokemonImage.children[0].style.opacity = 1;
-      //delete that hover div
-      pokemonImage.children[1].remove();
-    }
-  })
-
-  //SEARCH 
-  const search = document.querySelector('#pokemon-search-input');
-  
-  search.addEventListener('input', function(e){
+  searchForm.addEventListener('input', function(e){
     const pokemon = document.querySelectorAll('.center-text');
     let input = e.target.value;
 
@@ -65,30 +21,31 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 })
 
-function fetchPokemon(pokeContainer) {
-  fetch(POKE_URL)
-  .then(res => res.json())
-  .then(function(json){
-    json.forEach(function(pokemon){
-      pokeContainer.appendChild(pokeCard(pokemon))
-      POKE_ARRAY.push(pokemon);
-    })
-  })
-}
-
-function pokeCard(pokemon) {
-  let card = document.createElement('div')
-  card.className = 'pokemon-card'
-  card.innerHTML = `
-    <div class="pokemon-frame">
-      <h1 class="center-text"> ${pokemon.name} </h1>
-      <div class="pokemon-image">
-          <img data-id="${pokemon.id}" data-action="flip" class="toggle-sprite" src="${pokemon.sprites.front}">
-      </div>
-      <button type='submit' data-id='${pokemon.id}' name='edit-pokemon'> edit </button>
-      <button type='submit' data-id='${pokemon.id}' name='del-pokemon'> x </button>
-    </div>`
-  return card;
+const eventHandler = function(e) {
+  switch(e.type) {
+    case 'mouseover': {
+      if (e.target.className === 'pokemon-frame') {
+        e.target.children[1].style.display = '';
+        e.target.children[2].style.display = 'none';
+      }
+      break;
+    }
+    case 'mouseout': {
+      if (e.target.className === 'pokemon-frame') {
+        e.target.children[1].style.display = 'none';
+        e.target.children[2].style.display = '';
+      }
+      break;
+    }
+    case 'click': {
+      switch(e.target.className) {
+        case 'toggle-sprite': toggleSprite(e); break;
+        case 'del-pokemon': deletePokemon(e); break;
+        case 'edit-pokemon': editPokemon(e); break;
+      }
+      break;
+    }
+  }
 }
 
 function findPokemon(id) {
@@ -96,6 +53,40 @@ function findPokemon(id) {
   return POKE_ARRAY.find(function(poke) {
     return poke.id === index;
   })
+}
+
+function fetchPokemon(pokeContainer) {
+  fetch(POKE_URL)
+  .then(res => res.json())
+  .then(function(json){
+    //add all pokemon from json to the container
+    let allPokemon = json.map(pokemon => createPokemon(pokemon));
+    pokeContainer.innerHTML += allPokemon.join('')
+    //render the amount of pokemon
+    pokeContainer.getElementsByTagName('center')[0].innerText = `There are ${allPokemon.length} Pokémon here`;
+  })
+}
+
+function createPokemon(pokemon) {
+  POKE_ARRAY.push(pokemon);
+  return `
+  <div class='pokemon-card'>
+    <div class="pokemon-frame">
+      <h1 class="center-text"> ${pokemon.name} </h1>
+      <div class='hover' style='display: none'> ${showStats(pokemon)} </div>
+      <div class="pokemon-image">
+          <img data-id="${pokemon.id}" data-action="flip" class="toggle-sprite" src="${pokemon.sprites.front}">
+      </div>
+      <button type='submit' data-id='${pokemon.id}' class='edit-pokemon'> edit </button>
+      <button type='submit' data-id='${pokemon.id}' class='del-pokemon'> x </button>
+    </div>
+  </div>`;
+}
+
+function toggleSprite(e) {
+  let pokemon = findPokemon(e.target.dataset.id);
+
+  e.target.src = (e.target.src !== pokemon.sprites.back) ? pokemon.sprites.back : pokemon.sprites.front;
 }
 
 function createForm() {
@@ -117,9 +108,10 @@ function createForm() {
 }
 
 function createNewPokemon(e, pokeContainer) {
-  let name = e.target.children[1].value;
-  let front = e.target.children[3].value;
-  let back = e.target.children[5].value;
+  debugger
+  let name = e.target[0].value;
+  let front = e.target[1].value;
+  let back = e.target[2].value;
 
   fetch(POKE_URL, {
     method: 'POST',
@@ -144,7 +136,6 @@ function createNewPokemon(e, pokeContainer) {
 function deletePokemon(e) {
   fetch(POKE_URL + '/' + e.target.dataset.id, {
     method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' }
   })
   //remove from DOM and remove from array
   e.target.parentNode.parentNode.remove();
@@ -210,7 +201,7 @@ function showStats(pokemon) {
       }
     }
     return `
-      <font size='0.5'> 
+      <font size='2'> 
         <ul>
         <li> HP: ${hp} </li>
         <li> Attack: ${atk} </li>
@@ -222,6 +213,6 @@ function showStats(pokemon) {
       </font>
     `
   } else {
-    return `<font size='2'> Does not have stats! </font>`
+    return `<font size='3'> Does not have stats! </font>`
   }
 }
