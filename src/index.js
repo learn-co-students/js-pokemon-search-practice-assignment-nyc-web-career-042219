@@ -1,23 +1,20 @@
 const POKE_URL = 'http://localhost:3000/pokemon';
+const pokeContainer = document.querySelector('#pokemon-container');
+const searchForm = document.querySelector('#pokemon-search-input');
 const POKE_ARRAY = [];
 
 document.addEventListener('DOMContentLoaded', () => {
-  const pokeContainer = document.querySelector('#pokemon-container');
-  const searchForm = document.querySelector('#pokemon-search-input');
+  
   fetchPokemon(pokeContainer);
-  pokeContainer.prepend(createForm());
+  pokeContainer.prepend(newForm());
 
-  let flip = false;
-
-  ['click', 'submit', 'mouseover', 'mouseout'].forEach(event => pokeContainer.addEventListener(event, eventHandler, false));
+  ['click', 'submit', 'mouseover', 'mouseout'].forEach(event => pokeContainer.addEventListener(event, eventHandler, false));  
 
   searchForm.addEventListener('input', function(e){
     const pokemon = document.querySelectorAll('.center-text');
     let input = e.target.value;
-
-    pokemon.forEach(function(pokeName){
-      pokeName.parentNode.parentNode.style.display = (pokeName.innerText.includes(input)) ? 'block' : 'none';
-    })
+  
+    pokemon.forEach(pokeName => { pokeName.parentNode.parentNode.style.display = (pokeName.innerText.includes(input)) ? 'block' : 'none'; })
   })
 })
 
@@ -39,41 +36,47 @@ const eventHandler = function(e) {
     }
     case 'click': {
       switch(e.target.className) {
-        case 'toggle-sprite': toggleSprite(e); break;
-        case 'del-pokemon': deletePokemon(e); break;
-        case 'edit-pokemon': editPokemon(e); break;
+        case 'toggle-sprite': toggleImage(e); break;
+        case 'del-pokemon': deletePoke(e); break;
+        case 'edit-pokemon': editPoke(e); break;
       }
       break;
     }
+    case 'submit': {
+      e.preventDefault();
+
+      if (e.target.id === 'new-pokemon-form') newPoke(e, pokeContainer);
+    }
+    break;
   }
 }
 
-function findPokemon(id) {
+const findPokemon = function findPokemonInArray(id) {
   let index = Number(id);
   return POKE_ARRAY.find(function(poke) {
     return poke.id === index;
   })
 }
 
-function fetchPokemon(pokeContainer) {
+const fetchPokemon = function fetchAllPokemon(pokeContainer) {
   fetch(POKE_URL)
   .then(res => res.json())
   .then(function(json){
     //add all pokemon from json to the container
-    let allPokemon = json.map(pokemon => createPokemon(pokemon));
+    let allPokemon = json.map(pokemon => makePoke(pokemon));
     pokeContainer.innerHTML += allPokemon.join('')
     //render the amount of pokemon
     pokeContainer.getElementsByTagName('center')[0].innerText = `There are ${allPokemon.length} Pokémon here`;
   })
 }
 
-function createPokemon(pokemon) {
+const makePoke = function createPokemonDivCard(pokemon) {
   POKE_ARRAY.push(pokemon);
   return `
   <div class='pokemon-card'>
     <div class="pokemon-frame">
       <h1 class="center-text"> ${pokemon.name} </h1>
-      <div class='hover' style='display: none'> ${showStats(pokemon)} </div>
+      <div class='hover' style='display: none'> ${stats(pokemon)} </div>
       <div class="pokemon-image">
           <img data-id="${pokemon.id}" data-action="flip" class="toggle-sprite" src="${pokemon.sprites.front}">
       </div>
@@ -83,13 +86,13 @@ function createPokemon(pokemon) {
   </div>`;
 }
 
-function toggleSprite(e) {
+const toggleImage = function toggleSpriteImage(e) {
   let pokemon = findPokemon(e.target.dataset.id);
 
   e.target.src = (e.target.src !== pokemon.sprites.back) ? pokemon.sprites.back : pokemon.sprites.front;
 }
 
-function createForm() {
+const newForm = function createNewForm() {
   const form = document.createElement('form');
   form.className = 'form';
   form.id = 'new-pokemon-form';
@@ -107,17 +110,17 @@ function createForm() {
   return form;
 }
 
-function createNewPokemon(e, pokeContainer) {
+const newPoke = function createNewPokemonDivCard(e, pokeContainer) {
   debugger
-  let name = e.target[0].value;
-  let front = e.target[1].value;
-  let back = e.target[2].value;
+  //let name = e.target[0].value;
+  //let front = e.target[1].value;
+  //let back = e.target[2].value;
 
   fetch(POKE_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      name,
+      'name': e.target[0].value,
       sprites: {
         front,
         back
@@ -126,14 +129,14 @@ function createNewPokemon(e, pokeContainer) {
   })
   .then(resp => resp.json())
   .then(function(json) {
-    pokeContainer.appendChild(pokeCard(json));
+    pokeContainer.appendChild(makePoke(json));
     POKE_ARRAY.push(json);
   })
   e.target.reset();
   alert(`Created ${name}!`);
 }
 
-function deletePokemon(e) {
+const deletePoke = function deletePokemon(e) {
   fetch(POKE_URL + '/' + e.target.dataset.id, {
     method: 'DELETE',
   })
@@ -145,7 +148,7 @@ function deletePokemon(e) {
   element.remove();
 }
 
-function editPokemon(e) {
+const editPoke = function editPokemon(e) {
   let pokemon = findPokemon(e.target.dataset.id)
   let name = prompt('Edit Name:', pokemon.name);
   let front = prompt('Edit Front Image:', pokemon.sprites.front);
@@ -164,29 +167,18 @@ function editPokemon(e) {
       }
     })
   }) 
-  
-  //update array
-  let pokeElement = POKE_ARRAY.find(function(pokeElement) {
-    return pokemon.id === pokeElement.id
+  .then(resp => resp.json())
+  .then(edit => {
+    pokemon.sprites.front = front;
+    pokemon.sprites.back = back;
+
+    //re-render DOM with editted stuff
+    e.target.parentNode.getElementsByClassName('center-text')[0].innerText = name;
+    e.target.parentNode.getElementsByClassName('pokemon-image')[0].firstChild.src = front;
   })
-  pokeElement.sprites.front = front;
-  pokeElement.sprites.back = back;
-
-  //re-render DOM with editted stuff
-  e.target.parentNode.getElementsByClassName('center-text')[0].innerText = name;
-  e.target.parentNode.getElementsByClassName('pokemon-image')[0].firstChild.src = front;
 }
 
-function addImage(pokemon) {
-  let image = document.createElement('div')
-  image.className = 'pokemon-image';
-  image.innerHTML = `
-    <img data-id="${pokemon.id}" data-action="flip" class="toggle-sprite" src="${pokemon.sprites['front']}">
-  `
-  return image;
-}
-
-function showStats(pokemon) {
+const stats = function showStats(pokemon) {
   let hp, atk, def, speed, spDef, spAtk;
   // check and see if the pokemon has stats in the json
   if(pokemon.stats) {
