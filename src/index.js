@@ -51,14 +51,14 @@ const eventHandler = function(e) {
   }
 }
 
-const findPokemon = function findPokemonInArray(id) {
+function findPokemon(id) {
   let index = Number(id);
   return POKE_ARRAY.find(function(poke) {
     return poke.id === index;
   })
 }
 
-const fetchPokemon = function fetchAllPokemon(pokeContainer) {
+function fetchPokemon(pokeContainer) {
   fetch(POKE_URL)
   .then(res => res.json())
   .then(function(json){
@@ -70,7 +70,7 @@ const fetchPokemon = function fetchAllPokemon(pokeContainer) {
   })
 }
 
-const makePoke = function createPokemonDivCard(pokemon) {
+function makePoke(pokemon) {
   POKE_ARRAY.push(pokemon);
   return `
   <div class='pokemon-card'>
@@ -86,7 +86,7 @@ const makePoke = function createPokemonDivCard(pokemon) {
   </div>`;
 }
 
-const toggleImage = function toggleSpriteImage(e) {
+function toggleImage(e) {
   let pokemon = findPokemon(e.target.dataset.id);
 
   e.target.src = (e.target.src !== pokemon.sprites.back) ? pokemon.sprites.back : pokemon.sprites.front;
@@ -110,7 +110,7 @@ const newForm = function createNewForm() {
   return form;
 }
 
-const newPoke = function createNewPokemonDivCard(e, pokeContainer) {
+function newPoke(e, pokeContainer) {
   debugger
   //let name = e.target[0].value;
   //let front = e.target[1].value;
@@ -136,7 +136,7 @@ const newPoke = function createNewPokemonDivCard(e, pokeContainer) {
   alert(`Created ${name}!`);
 }
 
-const deletePoke = function deletePokemon(e) {
+function deletePoke(e) {
   fetch(POKE_URL + '/' + e.target.dataset.id, {
     method: 'DELETE',
   })
@@ -148,7 +148,7 @@ const deletePoke = function deletePokemon(e) {
   element.remove();
 }
 
-const editPoke = function editPokemon(e) {
+function editPoke(e) {
   let pokemon = findPokemon(e.target.dataset.id)
   let name = prompt('Edit Name:', pokemon.name);
   let front = prompt('Edit Front Image:', pokemon.sprites.front);
@@ -178,7 +178,7 @@ const editPoke = function editPokemon(e) {
   })
 }
 
-const stats = function showStats(pokemon) {
+function stats(pokemon) {
   let hp, atk, def, speed, spDef, spAtk;
   // check and see if the pokemon has stats in the json
   if(pokemon.stats) {
