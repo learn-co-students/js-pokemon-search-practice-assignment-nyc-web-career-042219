@@ -1,4 +1,4 @@
-# JS Pokemon Search Assignment
+# BALLIN
 
 ![pikachu](https://media.giphy.com/media/uLnPIWsqIz2aA/giphy.gif)
 
