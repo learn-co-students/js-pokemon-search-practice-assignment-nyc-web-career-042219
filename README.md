@@ -1,4 +1,3 @@
-# BALLIN
 
 ![pikachu](https://media.giphy.com/media/uLnPIWsqIz2aA/giphy.gif)
 
